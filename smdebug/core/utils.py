@@ -64,14 +64,19 @@ try:
 except (ImportError, ModuleNotFoundError):
     _torch_dist_imported = None
 
-
 try:
     import horovod.torch as hvd
 
     # This redundant import is necessary because horovod does not raise an ImportError if the library is not present
     import torch  # noqa
+    #make sure the library is correctly imported
+    hvd.init()
 
     _hvd_imported = hvd
+except AttributeError:
+    _hvd_imported = None
+    print("horovod.torch is not correctly imported.")
+    raise 
 except (ModuleNotFoundError, ImportError):
     try:
         import horovod.tensorflow as hvd
@@ -79,7 +84,7 @@ except (ModuleNotFoundError, ImportError):
         _hvd_imported = hvd
     except (ModuleNotFoundError, ImportError):
         _hvd_imported = None
-
+        raise
 
 logger = get_logger()
 error_handling_agent = (
